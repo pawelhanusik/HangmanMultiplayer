@@ -2,7 +2,6 @@ import socket
 import struct
 
 from network.packet.Packet import Packet
-from network.packet.ServerInfoPacket import ServerInfoPacket
 
 class Client:
     def __init__(self, mcast_grp = '224.1.1.1', mcast_port = 5007):
@@ -24,3 +23,15 @@ class Client:
     def recvPacketFrom(self):
         data, address = self.__sock.recvfrom(10240)
         return Packet.fromBytes(data), address
+    
+    def sendPacket(self, packet :Packet):
+        self.__sock.sendto(
+            packet.toBytes(),
+            (self.MCAST_GRP, self.MCAST_PORT)
+        )
+    
+    def sendPacketTo(self, packet :Packet, address):
+        self.__sock.sendto(
+            packet.toBytes(),
+            address
+        )

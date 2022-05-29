@@ -1,16 +1,16 @@
 from network.packet.Packet import Packet
 import tlv8
 
-class ServerInfoPacket(Packet):
-    def __init__(self, serverName):
+class SNewPlayer(Packet):
+    def __init__(self, username):
         super().__init__()
 
-        self.serverName = serverName
+        self.username = username
     
     def toBytes(self):
         structure = [
-            tlv8.Entry(1, "ServerInfoPacket"),
-            tlv8.Entry(2, self.serverName)
+            tlv8.Entry(1, "SNewPlayer"),
+            tlv8.Entry(2, self.username)
         ]
 
         return tlv8.encode(structure)
@@ -24,6 +24,6 @@ class ServerInfoPacket(Packet):
         
         dataDecoded = tlv8.decode(data, expected_structure)
 
-        return ServerInfoPacket(
+        return SNewPlayer(
             dataDecoded.first_by_id(2).data
         )
