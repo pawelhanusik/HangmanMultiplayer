@@ -16,18 +16,7 @@ server = Server()
 while True:
     server.sendPacket(SServerInfo(serverName))
 
-    read_sockets, write_sockets, error_sockets = server.select(2)
-
-    print(
-        len(read_sockets),
-        len(write_sockets),
-        len(error_sockets)
-    )
-
-    for sock in read_sockets:
-        data, address = sock.recvfrom(10240)
-        packet = Packet.fromBytes(data)
-
+    def onPacketRecv(packet, address):
         if isinstance(packet, CJoin):
             clientUsername = packet.username
             server.sendPacketTo(
@@ -37,5 +26,7 @@ while True:
             server.sendPacket(
                 SNewPlayer(clientUsername)
             )
+    
+    server.select(onPacketRecv, 2)
     
     time.sleep(2)

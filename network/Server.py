@@ -15,10 +15,15 @@ class Server:
         mreq = struct.pack("4sl", socket.inet_aton(self.MCAST_GRP), socket.INADDR_ANY)
         self.__sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
     
-    def select(self, timeout :float):
+    def select(self, onPacketRecv, timeout :float):
         read_sockets, write_sockets, error_sockets = select.select([self.__sock], [], [], timeout)
         
-        return read_sockets, write_sockets, error_sockets
+        for sock in read_sockets:
+            data, address = sock.recvfrom(10240)
+            packet = Packet.fromBytes(data)
+            
+            if callable(onPacketRecv):
+                onPacketRecv(packet, address)
 
     def recvPacket(self) -> Packet:
         data = self.__sock.recv(10240)
