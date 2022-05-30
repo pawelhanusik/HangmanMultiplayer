@@ -1,16 +1,16 @@
 from network.packet.Packet import Packet
 import tlv8
 
-class CJoin(Packet):
-    def __init__(self, username):
+class SRoundEndPacket(Packet):
+    def __init__(self, scoreboard :str):
         super().__init__()
 
-        self.username = username
+        self.scoreboard = scoreboard
     
     def toBytes(self):
         structure = [
-            tlv8.Entry(1, "CJoin"),
-            tlv8.Entry(2, self.username)
+            tlv8.Entry(1, "SRoundEndPacket"),
+            tlv8.Entry(2, self.scoreboard)
         ]
 
         return tlv8.encode(structure)
@@ -24,6 +24,6 @@ class CJoin(Packet):
         
         dataDecoded = tlv8.decode(data, expected_structure)
 
-        return CJoin(
+        return SRoundEndPacket(
             dataDecoded.first_by_id(2).data
         )

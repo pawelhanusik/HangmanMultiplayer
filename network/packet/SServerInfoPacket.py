@@ -1,7 +1,7 @@
 from network.packet.Packet import Packet
 import tlv8
 
-class SServerInfo(Packet):
+class SServerInfoPacket(Packet):
     def __init__(self, serverName):
         super().__init__()
 
@@ -9,7 +9,7 @@ class SServerInfo(Packet):
     
     def toBytes(self):
         structure = [
-            tlv8.Entry(1, "SServerInfo"),
+            tlv8.Entry(1, "SServerInfoPacket"),
             tlv8.Entry(2, self.serverName)
         ]
 
@@ -24,6 +24,6 @@ class SServerInfo(Packet):
         
         dataDecoded = tlv8.decode(data, expected_structure)
 
-        return SServerInfo(
+        return SServerInfoPacket(
             dataDecoded.first_by_id(2).data
         )

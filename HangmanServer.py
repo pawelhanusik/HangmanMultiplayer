@@ -2,10 +2,10 @@
 
 import socket
 from network.packet.Packet import Packet
-from network.packet.SServerInfo import SServerInfo
-from network.packet.CJoin import CJoin
-from network.packet.SJoin import SJoin
-from network.packet.SNewPlayer import SNewPlayer
+from network.packet.SServerInfoPacket import SServerInfoPacket
+from network.packet.CJoinPacket import CJoinPacket
+from network.packet.SJoinPacket import SJoinPacket
+from network.packet.SNewPlayerPacket import SNewPlayerPacket
 import time
 
 from network.Server import Server
@@ -15,21 +15,21 @@ players = []
 server = Server()
 
 while True:
-    server.sendPacket(SServerInfo(serverName))
+    server.sendPacket(SServerInfoPacket(serverName))
 
     def onPacketRecv(packet, address):
-        if isinstance(packet, CJoin):
+        if isinstance(packet, CJoinPacket):
             global players
 
             clientUsername = packet.username
             players += [clientUsername]
 
             server.sendPacketTo(
-                SJoin('\n'.join(players), True),
+                SJoinPacket('\n'.join(players), True),
                 address
             )
             server.sendPacket(
-                SNewPlayer(clientUsername)
+                SNewPlayerPacket(clientUsername)
             )
     
     server.select(onPacketRecv, 2)

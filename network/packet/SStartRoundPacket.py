@@ -1,18 +1,18 @@
 from network.packet.Packet import Packet
 import tlv8
 
-class SJoin(Packet):
-    def __init__(self, playersList :str, isUsernameAccepted :bool):
+class SStartRoundPacket(Packet):
+    def __init__(self, pickerUsername :str, scoreboard :str):
         super().__init__()
 
-        self.playersList = playersList
-        self.isUsernameAccepted = isUsernameAccepted
+        self.pickerUsername = pickerUsername
+        self.scoreboard = isUsernameAccepted
     
     def toBytes(self):
         structure = [
-            tlv8.Entry(1, "SJoin"),
-            tlv8.Entry(2, self.playersList),
-            tlv8.Entry(3, self.isUsernameAccepted)
+            tlv8.Entry(1, "SStartRoundPacket"),
+            tlv8.Entry(2, self.pickerUsername),
+            tlv8.Entry(3, self.scoreboard)
         ]
 
         return tlv8.encode(structure)
@@ -22,12 +22,12 @@ class SJoin(Packet):
         expected_structure = {
             1: tlv8.DataType.STRING,
             2: tlv8.DataType.STRING,
-            3: tlv8.DataType.INTEGER
+            3: tlv8.DataType.STRING
         }
         
         dataDecoded = tlv8.decode(data, expected_structure)
 
-        return SJoin(
+        return SStartRoundPacket(
             dataDecoded.first_by_id(2).data,
-            bool(dataDecoded.first_by_id(3).data)
+            dataDecoded.first_by_id(3).data
         )

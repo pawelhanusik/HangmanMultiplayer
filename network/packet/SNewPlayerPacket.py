@@ -1,16 +1,16 @@
 from network.packet.Packet import Packet
 import tlv8
 
-class SRoundEnd(Packet):
-    def __init__(self, scoreboard :str):
+class SNewPlayerPacket(Packet):
+    def __init__(self, username):
         super().__init__()
 
-        self.scoreboard = scoreboard
+        self.username = username
     
     def toBytes(self):
         structure = [
-            tlv8.Entry(1, "SRoundEnd"),
-            tlv8.Entry(2, self.scoreboard)
+            tlv8.Entry(1, "SNewPlayerPacket"),
+            tlv8.Entry(2, self.username)
         ]
 
         return tlv8.encode(structure)
@@ -24,6 +24,6 @@ class SRoundEnd(Packet):
         
         dataDecoded = tlv8.decode(data, expected_structure)
 
-        return SRoundEnd(
+        return SNewPlayerPacket(
             dataDecoded.first_by_id(2).data
         )

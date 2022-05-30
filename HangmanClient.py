@@ -5,10 +5,10 @@ import struct
 import time
 
 from network.packet.Packet import Packet
-from network.packet.SServerInfo import SServerInfo
-from network.packet.CJoin import CJoin
-from network.packet.SJoin import SJoin
-from network.packet.SNewPlayer import SNewPlayer
+from network.packet.SServerInfoPacket import SServerInfoPacket
+from network.packet.CJoinPacket import CJoinPacket
+from network.packet.SJoinPacket import SJoinPacket
+from network.packet.SNewPlayerPacket import SNewPlayerPacket
 
 from network.Client import Client
 
@@ -35,18 +35,18 @@ while running:
         packet = client.recvPacket()
     
     if gameState == GameState.CONNECTING:
-        if isinstance(packet, SServerInfo):
+        if isinstance(packet, SServerInfoPacket):
             address = recvAddress
             print(
                 "Server name:", packet.serverName,
                 "\tServer IP:", address
             )
 
-            client.sendPacketTo(CJoin(username), address)
+            client.sendPacketTo(CJoinPacket(username), address)
             gameState = GameState.WAITING_FOR_PLAYERS
 
     elif gameState == GameState.WAITING_FOR_PLAYERS:
-        if isinstance(packet, SJoin):
+        if isinstance(packet, SJoinPacket):
             if not packet.isUsernameAccepted:
                 print("Incorrect username! Please try other.")
                 gameState = GameState.CONNECTING
@@ -54,7 +54,7 @@ while running:
                 players = packet.players.split("\n")
                 print("Players:", players)
             
-        elif isinstance(packet, SNewPlayer):
+        elif isinstance(packet, SNewPlayerPacket):
             players += [packet.username]
             print("Players:", players)
             

@@ -1,16 +1,16 @@
 from network.packet.Packet import Packet
 import tlv8
 
-class CGuessLetter(Packet):
-    def __init__(self, letter):
+class CSelectWordPacket(Packet):
+    def __init__(self, word):
         super().__init__()
 
-        self.letter = letter
+        self.word = word
     
     def toBytes(self):
         structure = [
-            tlv8.Entry(1, "CGuessLetter"),
-            tlv8.Entry(2, self.letter)
+            tlv8.Entry(1, "CSelectWordPacket"),
+            tlv8.Entry(2, self.word)
         ]
 
         return tlv8.encode(structure)
@@ -24,6 +24,6 @@ class CGuessLetter(Packet):
         
         dataDecoded = tlv8.decode(data, expected_structure)
 
-        return CGuessLetter(
+        return CSelectWordPacket(
             dataDecoded.first_by_id(2).data
         )

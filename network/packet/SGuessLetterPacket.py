@@ -1,7 +1,7 @@
 from network.packet.Packet import Packet
 import tlv8
 
-class SGuessLetter(Packet):
+class SGuessLetterPacket(Packet):
     def __init__(self, occurences :int, word :str, remainingLifes :int):
         super().__init__()
 
@@ -11,7 +11,7 @@ class SGuessLetter(Packet):
     
     def toBytes(self):
         structure = [
-            tlv8.Entry(1, "SGuessLetter"),
+            tlv8.Entry(1, "SGuessLetterPacket"),
             tlv8.Entry(2, self.occurences),
             tlv8.Entry(3, self.word),
             tlv8.Entry(4, self.remainingLifes)
@@ -30,7 +30,7 @@ class SGuessLetter(Packet):
         
         dataDecoded = tlv8.decode(data, expected_structure)
 
-        return SGuessLetter(
+        return SGuessLetterPacket(
             dataDecoded.first_by_id(2).data,
             dataDecoded.first_by_id(3).data,
             dataDecoded.first_by_id(4).data
