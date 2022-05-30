@@ -49,6 +49,7 @@ while running:
         if isinstance(packet, SJoinPacket):
             if not packet.isUsernameAccepted:
                 print("Incorrect username! Please try other.")
+                username = input("Select username: ")
                 gameState = GameState.CONNECTING
             else:
                 players = packet.playersList.split("\n")
