@@ -14,7 +14,7 @@ from network.Client import Client
 
 from enum import IntEnum
 
-username = 'PlayerA'
+username = input("Select username: ")
 client = Client()
 
 print("Waiting for server...")
