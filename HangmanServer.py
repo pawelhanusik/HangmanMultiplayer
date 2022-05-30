@@ -6,7 +6,7 @@ from network.packet.SServerInfoPacket import SServerInfoPacket
 from network.packet.CJoinPacket import CJoinPacket
 from network.packet.SJoinPacket import SJoinPacket
 from network.packet.SNewPlayerPacket import SNewPlayerPacket
-from Game import Game
+from Game import Game, Player
 import time
 
 from network.Server import Server
@@ -22,16 +22,22 @@ while True:
         if isinstance(packet, CJoinPacket):
             global game
 
-            clientUsername = packet.username
-            game.addPlayer(clientUsername)
-            
-            server.sendPacketTo(
-                SJoinPacket('\n'.join(game.getPlayers()), True),
-                address
-            )
-            server.sendPacket(
-                SNewPlayerPacket(clientUsername)
-            )
+            newPlayer = Player(packet.username, address)
+            hasNewPlayerBeenAdded = game.addPlayer(newPlayer)
+
+            if not hasNewPlayerBeenAdded:
+                server.sendPacketTo(
+                    SJoinPacket('', False),
+                    newPlayer.address
+                )
+            else:
+                server.sendPacketTo(
+                    SJoinPacket(game.getPlayersStr(), True),
+                    newPlayer.address
+                )
+                server.sendPacket(
+                    SNewPlayerPacket(newPlayer.username)
+                )
     
     server.select(onPacketRecv, 2)
     
