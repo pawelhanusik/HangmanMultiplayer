@@ -6,12 +6,13 @@ from network.packet.SServerInfoPacket import SServerInfoPacket
 from network.packet.CJoinPacket import CJoinPacket
 from network.packet.SJoinPacket import SJoinPacket
 from network.packet.SNewPlayerPacket import SNewPlayerPacket
+from Game import Game
 import time
 
 from network.Server import Server
 
 serverName = 'GameServer'
-players = []
+game = Game()
 server = Server()
 
 while True:
@@ -19,13 +20,13 @@ while True:
 
     def onPacketRecv(packet, address):
         if isinstance(packet, CJoinPacket):
-            global players
+            global game
 
             clientUsername = packet.username
-            players += [clientUsername]
-
+            game.addPlayer(clientUsername)
+            
             server.sendPacketTo(
-                SJoinPacket('\n'.join(players), True),
+                SJoinPacket('\n'.join(game.getPlayers()), True),
                 address
             )
             server.sendPacket(
