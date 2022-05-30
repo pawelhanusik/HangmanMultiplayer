@@ -51,10 +51,11 @@ while running:
                 print("Incorrect username! Please try other.")
                 gameState = GameState.CONNECTING
             else:
-                players = packet.players.split("\n")
+                players = packet.playersList.split("\n")
                 print("Players:", players)
             
         elif isinstance(packet, SNewPlayerPacket):
-            players += [packet.username]
+            if packet.username not in players:
+                players += [packet.username]
             print("Players:", players)
             
