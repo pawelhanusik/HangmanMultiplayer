@@ -9,4 +9,4 @@ class SStartRoundPacket(Packet):
 
     def __init__(self, pickerUsername :str, scoreboard :str):
         self.pickerUsername = pickerUsername
-        self.scoreboard = isUsernameAccepted
+        self.scoreboard = scoreboard

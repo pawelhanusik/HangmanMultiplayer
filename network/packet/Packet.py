@@ -18,7 +18,6 @@ class Packet:
                 tlv8.Entry(keyId, getattr(self, f[1]), f[0])
             ]
             keyId += 1
-
         return tlv8.encode(structure)
 
     @staticmethod

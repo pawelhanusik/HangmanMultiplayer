@@ -1,3 +1,6 @@
+import random
+from Hangmans import HANGMANPICS
+
 class Player:
     def __init__(self, username, address = None):
         self.username = username
@@ -9,6 +12,11 @@ class Player:
 class Game:
     def __init__(self):
         self.players = []
+        self.scoreboard = []
+        self.round_counter = 1
+        self.word = ""
+        self.attempts = {}
+        self.max_lifes = len(HANGMANPICS)
     
     def getPlayersStr(self):
         ret = ''
@@ -30,3 +38,21 @@ class Game:
         
         self.players += [player]
         return True
+
+    def choosePlayerCreatingWord(self):
+        return random.choice(self.players).username
+    
+    def setWord(self, word):
+        self.word = word
+    
+    def updateWordForUser(self, username):
+        user_db = self.attempts[username]
+        user_letters = user_db[1]
+        new_user_word = ""
+        for char in self.word:
+            if char in user_letters:
+                new_user_word += f'{char} '
+            else:
+                new_user_word += '_ '
+        self.attempts[username][0] = new_user_word
+        return new_user_word
