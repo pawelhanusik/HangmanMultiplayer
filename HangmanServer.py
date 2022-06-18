@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-from cgi import print_form
 from hashlib import new
 import socket
+import sys, syslog
 from struct import pack
 from network.packet.CStartGamePacket import CStartGamePacket
 from network.packet.Packet import Packet
@@ -27,23 +27,35 @@ game = Game()
 server = Server()
 scoreboard = "test"
 
+syslog.openlog(sys.argv[0])
+
+def log(*args, sep=' '):
+    s = ''
+    first = True
+    for a in args:
+        if first:
+            first = False
+        else:
+            s += str(sep)
+        s += str(a)
+    syslog.syslog(syslog.LOG_DEBUG, s)
+
 lobby_starting_timestamp = int(time.time())
 LOBBY_CLOSE_TIME = 20
 LOBBY_OPEN = True
-print("Lobby creation timestamp: ", lobby_starting_timestamp)
-print(f"Server will stop accepting new users after: {LOBBY_CLOSE_TIME} seconds")
+log("Lobby creation timestamp: ", lobby_starting_timestamp)
+log(f"Server will stop accepting new users after: {LOBBY_CLOSE_TIME} seconds")
 
-
-def printLobbyDetails():
+def logLobbyDetails():
     global game
-    print("Current lobby: ")
-    print("User count: ", len(game.players))
+    log("Current lobby: ")
+    log("User count: ", len(game.players))
     for player in game.players:
-        print(player.username, ' - ', player.address)
-    print("Lobby open? ", LOBBY_OPEN)
-    print("Current round: ", game.round_counter)
-    print("Scoreboard: ", game.scoreboard)
-    print("-" * 30)
+        log(player.username, ' - ', player.address)
+    log("Lobby open? ", LOBBY_OPEN)
+    log("Current round: ", game.round_counter)
+    log("Scoreboard: ", game.scoreboard)
+    log("-" * 30)
 
 while True:
     server.sendPacket(SServerInfoPacket(serverName))
@@ -78,11 +90,11 @@ while True:
         elif isinstance(packet, CStartGamePacket):
             chosenPlayer = game.choosePlayerCreatingWord()
             server.sendPacket(SStartRoundPacket(chosenPlayer, scoreboard))
-            print("Sending start round packet")
+            log("Sending start round packet")
             
         elif isinstance(packet, CSelectWordPacket):
-            print("========== New word selected ==========")
-            print(f"========== {packet.word.lower()} ==========")
+            log("========== New word selected ==========")
+            log(f"========== {packet.word.lower()} ==========")
             game.setWord(packet.word.lower())
             
             # After the word has been selected, censor it and send it to all users
@@ -91,7 +103,7 @@ while True:
         elif isinstance(packet, CGuessLetterPacket):
             guessing_username = packet.username
             guessing_letter = packet.letter
-            print("Got a guess from: ", guessing_username)
+            log("Got a guess from: ", guessing_username)
             for player in game.players:
                 if player.username == guessing_username:
                     player_address = player.address
@@ -121,8 +133,8 @@ while True:
         server.sendPacket(
             SStartRoundPacket(chosenPlayer, scoreboardJsoned)
         )
-        print("========== Sending start round packet ==========")
+        log("========== Sending start round packet ==========")
         LOBBY_OPEN = False
 
-    printLobbyDetails()
+    logLobbyDetails()
     time.sleep(2)
