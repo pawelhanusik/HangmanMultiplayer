@@ -91,12 +91,12 @@ while running:
             client.sendPacketTo(CSelectWordPacket(word), address)
 
     elif gameState == GameState.GAME_READY:
-        if isinstance(packet, SWordReadyPacket):
+        if isinstance(packet, SWordReadyPacket) and guessing == True:
             print("-" * 30)
             print("Word: ", packet.word)
             makeAGuess()
 
-        elif isinstance(packet, SGuessLetterPacket):
+        elif isinstance(packet, SGuessLetterPacket) and guessing == True:
             print(packet.word)
             print(packet.remainingLifes)
             print("-" * 30)
