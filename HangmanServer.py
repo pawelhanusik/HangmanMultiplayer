@@ -6,6 +6,7 @@ import socket
 import sys, syslog
 import daemon
 from struct import pack
+
 from network.packet.CStartGamePacket import CStartGamePacket
 from network.packet.Packet import Packet
 from network.packet.SServerInfoPacket import SServerInfoPacket
@@ -19,6 +20,7 @@ from network.packet.CGuessLetterPacket import CGuessLetterPacket
 from network.packet.SGuessLetterPacket import SGuessLetterPacket
 from network.packet.SRoundEndPacket import SRoundEndPacket
 from network.packet.SGameEndPacket import SGameEndPacket
+from network.packet.SInfoToUser import SInfoToUser
 
 from Game import Game, Player
 import time
@@ -158,7 +160,7 @@ with daemon.DaemonContext():
                 for player in game.players:
                     if player.username == guessing_username:
                         player_address = player.address
-                game.attempts[guessing_username][1] += guessing_letter
+                
 
                 #Wrong guess
                 if guessing_letter not in game.word:
@@ -167,11 +169,13 @@ with daemon.DaemonContext():
                 else:
                     #New letter
                     if guessing_letter not in game.attempts[guessing_username][1]:
+                        game.attempts[guessing_username][1] += guessing_letter
                         correctLetters = len([i for i, x in enumerate(game.word) if x == guessing_letter])
                         game.attempts[guessing_username][3] += correctLetters
                     #Letter used before
                     else:
-                        print("You fool! You have used that letter before. Great waste of round.")
+                        game.attempts[guessing_username][2] += 1
+                        server.sendPacket(SInfoToUser("You fool! You have used that letter before. Great waste of round."))
                 new_censored_word = game.updateWordForUser(guessing_username)
                 if game.attempts[guessing_username][3] == game.correctLetters:
                     finishedPlayers += 1

@@ -20,6 +20,7 @@ from network.packet.SWordReadyPacket import SWordReadyPacket
 from network.packet.CGuessLetterPacket import CGuessLetterPacket
 from network.packet.SGuessLetterPacket import SGuessLetterPacket
 from network.packet.SRoundEndPacket import SRoundEndPacket
+from network.packet.SInfoToUser import SInfoToUser
 
 from network.Client import Client
 from Hangmans import HANGMANPICS
@@ -133,3 +134,5 @@ while running:
             print(packet.word)
             print("PACKET RECEIVED")
             makeAGuess()
+        elif isinstance(packet, SInfoToUser):
+            print(packet.info)
