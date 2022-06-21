@@ -44,7 +44,7 @@ with daemon.DaemonContext():
     game = Game()
     server = Server()
     scoreboard = "test"
-    
+
     lobby_starting_timestamp = int(time.time())
     LOBBY_CLOSE_TIME = 20
     LOBBY_OPEN = True
@@ -71,20 +71,20 @@ with daemon.DaemonContext():
     ROUND_TIME = 120
     MAX_ROUNDS = 4
     LOBBY_OPEN = True
-    print("Lobby creation timestamp: ", lobby_starting_timestamp)
-    print(f"Server will stop accepting new users after: {LOBBY_CLOSE_TIME} seconds")
+    log("Lobby creation timestamp: ", lobby_starting_timestamp)
+    log(f"Server will stop accepting new users after: {LOBBY_CLOSE_TIME} seconds")
 
 
     def printLobbyDetails():
         global game
-        print("Current lobby: ")
-        print("User count: ", len(game.players))
+        log("Current lobby: ")
+        log("User count: ", len(game.players))
         for player in game.players:
-            print(player.username, ' - ', player.address)
-        print("Lobby open? ", LOBBY_OPEN)
-        print("Current round: ", game.round_counter)
-        print("Scoreboard: ", game.scoreboard)
-        print("-" * 30)
+            log(player.username, ' - ', player.address)
+        log("Lobby open? ", LOBBY_OPEN)
+        log("Current round: ", game.round_counter)
+        log("Scoreboard: ", game.scoreboard)
+        log("-" * 30)
 
     def roundEnded(winner):
         global finishedPlayers
@@ -141,21 +141,21 @@ with daemon.DaemonContext():
                 chosenPlayer = game.choosePlayerCreatingWord()
                 scoreboardJsoned = json.dumps(game.scoreboard)
                 server.sendPacket(SStartRoundPacket(chosenPlayer, scoreboardJsoned))
-                print("Sending start round packet")
+                log("Sending start round packet")
                 
             elif isinstance(packet, CSelectWordPacket):
-                print("========== New word selected ==========")
-                print(f"========== {packet.word.lower()} ==========")
+                log("========== New word selected ==========")
+                log(f"========== {packet.word.lower()} ==========")
                 game.setWord(packet.word.lower())
                 
                 # After the word has been selected, censor it and send it to all users
                 server.sendPacket(SWordReadyPacket('_ ' * len(game.word)))
 
             elif isinstance(packet, CGuessLetterPacket):
-                print(chosenPlayer)
+                log(chosenPlayer)
                 guessing_username = packet.username
                 guessing_letter = packet.letter
-                print("Got a guess from: ", guessing_username)
+                log("Got a guess from: ", guessing_username)
                 for player in game.players:
                     if player.username == guessing_username:
                         player_address = player.address
@@ -164,18 +164,18 @@ with daemon.DaemonContext():
                     game.attempts[guessing_username][2] += 1
                 else:
                     correctLetters = len([i for i, x in enumerate(game.word) if x == guessing_letter])
-                    game.attempts[guessing_username][3] += correctLetters 
+                    game.attempts[guessing_username][3] += correctLetters
                 new_censored_word = game.updateWordForUser(guessing_username)
                 if game.attempts[guessing_username][3] == game.correctLetters:
                     finishedPlayers += 1
                     roundEnded(guessing_username)
                 elif game.attempts[guessing_username][2] == 6:
-                    print(chosenPlayer)
+                    log(chosenPlayer)
                     finishedPlayers += 1
                     if finishedPlayers == (len(game.players) - 1):
                         roundEnded(chosenPlayer)
                 else:
-                    print("SENDING PACKET")
+                    log("SENDING PACKET")
                     server.sendPacketTo(
                     SGuessLetterPacket(new_censored_word, game.attempts[guessing_username][2]),
                     player_address
@@ -192,14 +192,14 @@ with daemon.DaemonContext():
         
         if game.round_counter == MAX_ROUNDS + 1:
             sorted_scoreboard = sorted(game.scoreboard, key=lambda x: x[1], reverse=True)
-            print(f"Sorted scoreboard: {sorted_scoreboard}")
+            log(f"Sorted scoreboard: {sorted_scoreboard}")
             first_player = sorted_scoreboard[0]
             players_with_same_points = [first_player[0]]
             sorted_scoreboard.pop(0)
             for scoreboard in sorted_scoreboard:
-                print(scoreboard)
+                log(scoreboard)
                 if scoreboard[1] == first_player[1]:
-                    players_with_same_points.append(scoreboard[0]) 
+                    players_with_same_points.append(scoreboard[0])
             server.sendPacket(SGameEndPacket(json.dumps(players_with_same_points)))
             exit(0)
         # If lobby closed, send info to all connected players that the round is starting
