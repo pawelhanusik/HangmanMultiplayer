@@ -85,6 +85,8 @@ def printLobbyDetails():
     print("-" * 30)
 
 def roundEnded(winner):
+    global finishedPlayers
+
     for scoreboard in game.scoreboard:
         if scoreboard[0] == winner:
             scoreboard[1] += 1
@@ -103,6 +105,8 @@ def roundEnded(winner):
 while True:
     server.sendPacket(SServerInfoPacket(serverName))
     def onPacketRecv(packet, address):
+        global finishedPlayers
+        
         if isinstance(packet, CJoinPacket):
             global game
 
@@ -161,12 +165,10 @@ while True:
                 game.attempts[guessing_username][3] += correctLetters 
             new_censored_word = game.updateWordForUser(guessing_username)
             if game.attempts[guessing_username][3] == game.correctLetters:
-                global finishedPlayers
                 finishedPlayers += 1
                 roundEnded(guessing_username)
             elif game.attempts[guessing_username][2] == 6:
                 print(chosenPlayer)
-                global finishedPlayers
                 finishedPlayers += 1
                 if finishedPlayers == (len(game.players) - 1):
                     roundEnded(chosenPlayer)
