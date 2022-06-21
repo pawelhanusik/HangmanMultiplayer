@@ -75,11 +75,9 @@ while running:
                 gameState = GameState.CONNECTING
             else:
                 players = packet.playersList.split("\n")
-                #print("Players:", players)
         elif isinstance(packet, SNewPlayerPacket):
             if packet.username not in players:
                 players += [packet.username]
-            #print("Players:", players)
         elif isinstance(packet, SStartRoundPacket):
             print("-" * 30)
             gameState = GameState.GAME_READY
@@ -94,7 +92,6 @@ while running:
             client.sendPacketTo(CSelectWordPacket(word), address)
 
     elif gameState == GameState.GAME_READY:
-        print(packet)
         if isinstance(packet, SRoundEndPacket):
             print(f"Winner of this round is: {packet.who_won}")
             print(f"Correct word was: {packet.game_word}")
@@ -123,5 +120,3 @@ while running:
             print(packet.word)
             print("PACKET RECEIVED")
             makeAGuess()
-       
-
