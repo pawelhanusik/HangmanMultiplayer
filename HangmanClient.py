@@ -51,10 +51,14 @@ def makeAGuess():
     client.sendPacketTo(CGuessLetterPacket(guess, username), address)
 
 while running:
-    if gameState == GameState.CONNECTING:
-        packet, recvAddress = client.recvPacketFrom()
-    else:
-        packet = client.recvPacket()
+    try:
+        if gameState == GameState.CONNECTING:
+            packet, recvAddress = client.recvPacketFrom()
+        else:
+            packet = client.recvPacket()
+    except Exception:
+        print("Connection to server lost. Quitting!")
+        running = False
     
     if gameState == GameState.CONNECTING:
         # Get server name and IP address

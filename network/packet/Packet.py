@@ -41,6 +41,9 @@ class Packet:
         Based on data received, it will automatically choose proper packet class
         """
 
+        if data is None:
+            return None
+
         # Receive class name which packet class is being received
         expected_structure = {
             1: tlv8.DataType.STRING

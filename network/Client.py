@@ -19,6 +19,8 @@ class Client:
 
         mreq = struct.pack("4sl", socket.inet_aton(self.MCAST_GRP), socket.INADDR_ANY)
         self.__sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+        
+        self.__sock.settimeout(60)
     
     def recvPacket(self) -> Packet:
         """
