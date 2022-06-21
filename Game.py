@@ -57,7 +57,6 @@ class Game:
             else:
                 new_user_word += '_ '
         self.attempts[username][0] = new_user_word
-        print(self.attempts)
         return new_user_word
     
     def resetRound(self):
