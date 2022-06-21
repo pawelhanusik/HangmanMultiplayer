@@ -17,6 +17,7 @@ class Game:
         self.word = ""
         self.attempts = {}
         self.max_lifes = len(HANGMANPICS)
+        self.correctLetters = 0
     
     def getPlayersStr(self):
         ret = ''
@@ -44,6 +45,7 @@ class Game:
     
     def setWord(self, word):
         self.word = word
+        self.correctLetters = len(word)
     
     def updateWordForUser(self, username):
         user_db = self.attempts[username]
@@ -55,4 +57,11 @@ class Game:
             else:
                 new_user_word += '_ '
         self.attempts[username][0] = new_user_word
+        print(self.attempts)
         return new_user_word
+    
+    def resetRound(self):
+        self.word = ""
+        self.attempts = {}
+        self.max_lifes = len(HANGMANPICS)
+        self.correctLetters = 0

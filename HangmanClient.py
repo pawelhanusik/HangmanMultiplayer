@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from cProfile import run
 from pydoc import cli
 import socket
 import struct
@@ -7,6 +8,7 @@ import time
 import json 
 
 from network.packet.Packet import Packet
+from network.packet.SGameEndPacket import SGameEndPacket
 from network.packet.SServerInfoPacket import SServerInfoPacket
 from network.packet.CJoinPacket import CJoinPacket
 from network.packet.SJoinPacket import SJoinPacket
@@ -17,6 +19,7 @@ from network.packet.CSelectWordPacket import CSelectWordPacket
 from network.packet.SWordReadyPacket import SWordReadyPacket
 from network.packet.CGuessLetterPacket import CGuessLetterPacket
 from network.packet.SGuessLetterPacket import SGuessLetterPacket
+from network.packet.SRoundEndPacket import SRoundEndPacket
 
 from network.Client import Client
 from Hangmans import HANGMANPICS
@@ -91,16 +94,34 @@ while running:
             client.sendPacketTo(CSelectWordPacket(word), address)
 
     elif gameState == GameState.GAME_READY:
-        if isinstance(packet, SWordReadyPacket) and guessing == True:
+        print(packet)
+        if isinstance(packet, SRoundEndPacket):
+            print(f"Winner of this round is: {packet.who_won}")
+            print(f"Correct word was: {packet.game_word}")
+            print(f"Current scoreboard is:\n")
+            guessing = True
+            gameState = GameState.WAITING_FOR_PLAYERS
+            if username==packet.who_won:
+                client.sendPacketTo(CStartGamePacket(), address)
+            print(json.loads(packet.scoreboard))
+        elif isinstance(packet, SGameEndPacket):
+            print(f"Final winner/s:")
+            for winner in json.loads(packet.winners):
+                print(f"{winner}\n")
+            print("Congratulations!!!")
+            running = False
+        elif isinstance(packet, SWordReadyPacket) and guessing == True:
             print("-" * 30)
             print("Word: ", packet.word)
             makeAGuess()
-
         elif isinstance(packet, SGuessLetterPacket) and guessing == True:
+            print("GUESS LETTER")
             print(packet.word)
             print(packet.remainingLifes)
             print("-" * 30)
-            print(HANGMANPICS[ packet.remainingLifes -1 ])
+            print(HANGMANPICS[ packet.remainingLifes ])
             print(packet.word)
+            print("PACKET RECEIVED")
             makeAGuess()
+       
 
