@@ -31,6 +31,7 @@ client = Client()
 
 print("Waiting for server...")
 
+# Client reacts differently on different game states
 class GameState(IntEnum):
     CONNECTING = 0
     WAITING_FOR_PLAYERS = 1
@@ -42,7 +43,7 @@ address = None
 guessing = True
 players = []
 
-
+# Function to take 1 letter as input and pass it to the server
 def makeAGuess():
     guess = ""
     while len(guess) != 1:
@@ -56,6 +57,7 @@ while running:
         packet = client.recvPacket()
     
     if gameState == GameState.CONNECTING:
+        # Get server name and IP address
         if isinstance(packet, SServerInfoPacket):
             address = recvAddress
             print(
@@ -65,7 +67,7 @@ while running:
 
             client.sendPacketTo(CJoinPacket(username), address)
             gameState = GameState.WAITING_FOR_PLAYERS
-
+    # Join lobby
     elif gameState == GameState.WAITING_FOR_PLAYERS:
         if isinstance(packet, SJoinPacket):
             if not packet.isUsernameAccepted:
@@ -75,9 +77,11 @@ while running:
                 gameState = GameState.CONNECTING
             else:
                 players = packet.playersList.split("\n")
+        # Handle packet announcing that new player has joined the lobby
         elif isinstance(packet, SNewPlayerPacket):
             if packet.username not in players:
                 players += [packet.username]
+        # Handle packet announcing start of a new round
         elif isinstance(packet, SStartRoundPacket):
             print("-" * 30)
             gameState = GameState.GAME_READY
@@ -85,6 +89,7 @@ while running:
             print("Current scoreboard: ")
             print(scoreboard)
             print("-" * 30)
+            # If the server has choesn this player to choose a word, ask him to input a word
             if username != packet.pickerUsername:
                 continue
             word = input("Input word: ")
@@ -107,10 +112,12 @@ while running:
                 print(f"{winner}\n")
             print("Congratulations!!!")
             running = False
+        # Guess a word 
         elif isinstance(packet, SWordReadyPacket) and guessing == True:
             print("-" * 30)
             print("Word: ", packet.word)
             makeAGuess()
+        # Guess a word 
         elif isinstance(packet, SGuessLetterPacket) and guessing == True:
             print("GUESS LETTER")
             print(packet.word)

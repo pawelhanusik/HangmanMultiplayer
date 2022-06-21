@@ -1,3 +1,4 @@
+# Store ASCII art of hangman levels
 HANGMANPICS = ['''
   +---+
   |   |

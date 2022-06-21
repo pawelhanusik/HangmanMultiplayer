@@ -40,13 +40,16 @@ class Game:
         self.players += [player]
         return True
 
+    # Randomly select player to choose new word
     def choosePlayerCreatingWord(self):
         return random.choice(self.players).username
     
+    # Set game's word 
     def setWord(self, word):
         self.word = word
         self.correctLetters = len(word)
     
+    # Update guess information connected with one user
     def updateWordForUser(self, username):
         user_db = self.attempts[username]
         user_letters = user_db[1]

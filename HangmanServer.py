@@ -55,7 +55,8 @@ with daemon.DaemonContext():
     LOBBY_OPEN = True
     log("Lobby creation timestamp: ", lobby_starting_timestamp)
     log(f"Server will stop accepting new users after: {LOBBY_CLOSE_TIME} seconds")
-
+    
+    # Outputs basic lobby info to syslog
     def logLobbyDetails():
         global game
         log("Current lobby: ")
@@ -78,18 +79,6 @@ with daemon.DaemonContext():
     LOBBY_OPEN = True
     log("Lobby creation timestamp: ", lobby_starting_timestamp)
     log(f"Server will stop accepting new users after: {LOBBY_CLOSE_TIME} seconds")
-
-
-    def printLobbyDetails():
-        global game
-        log("Current lobby: ")
-        log("User count: ", len(game.players))
-        for player in game.players:
-            log(player.username, ' - ', player.address)
-        log("Lobby open? ", LOBBY_OPEN)
-        log("Current round: ", game.round_counter)
-        log("Scoreboard: ", game.scoreboard)
-        log("-" * 30)
 
     def roundEnded(winner):
         global finishedPlayers
@@ -127,11 +116,13 @@ with daemon.DaemonContext():
                     )
                     return
                 hasNewPlayerBeenAdded = game.addPlayer(newPlayer)
+                # Send false if there was an error adding new player to the lobby
                 if not hasNewPlayerBeenAdded:
                     server.sendPacketTo(
                         SJoinPacket('', False),
                         newPlayer.address
                     )
+                # Player successfully added to the lobby
                 else:
                     server.sendPacketTo(
                         SJoinPacket(game.getPlayersStr(), True),
@@ -140,14 +131,14 @@ with daemon.DaemonContext():
                     server.sendPacket(
                         SNewPlayerPacket(newPlayer.username)
                     )
-            
+            # Sending packet announcing start of a new round
             elif isinstance(packet, CStartGamePacket):
                 global chosenPlayer
                 chosenPlayer = game.choosePlayerCreatingWord()
                 scoreboardJsoned = json.dumps(game.scoreboard)
                 server.sendPacket(SStartRoundPacket(chosenPlayer, scoreboardJsoned))
                 log("Sending start round packet")
-                
+            # Getting a new guess word from a player
             elif isinstance(packet, CSelectWordPacket):
                 log("========== New word selected ==========")
                 log(f"========== {packet.word.lower()} ==========")
@@ -155,7 +146,7 @@ with daemon.DaemonContext():
                 
                 # After the word has been selected, censor it and send it to all users
                 server.sendPacket(SWordReadyPacket('_ ' * len(game.word)))
-
+            # Player has sent a guess letter
             elif isinstance(packet, CGuessLetterPacket):
                 log(chosenPlayer)
                 guessing_username = packet.username
