@@ -101,6 +101,7 @@ while running:
             client.sendPacketTo(CSelectWordPacket(word), address)
 
     elif gameState == GameState.GAME_READY:
+        #Client received packet ending round
         if isinstance(packet, SRoundEndPacket):
             print(f"Winner of this round is: {packet.who_won}")
             print(f"Correct word was: {packet.game_word}")
@@ -110,6 +111,7 @@ while running:
             if username==packet.who_won:
                 client.sendPacketTo(CStartGamePacket(), address)
             print(json.loads(packet.scoreboard))
+        #Packet ending game
         elif isinstance(packet, SGameEndPacket):
             print(f"Final winner/s:")
             for winner in json.loads(packet.winners):

@@ -61,7 +61,7 @@ class Game:
                 new_user_word += '_ '
         self.attempts[username][0] = new_user_word
         return new_user_word
-    
+    #Resetting variables before next round
     def resetRound(self):
         self.word = ""
         self.attempts = {}

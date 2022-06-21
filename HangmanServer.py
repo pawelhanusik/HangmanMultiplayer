@@ -80,6 +80,7 @@ with daemon.DaemonContext():
     log("Lobby creation timestamp: ", lobby_starting_timestamp)
     log(f"Server will stop accepting new users after: {LOBBY_CLOSE_TIME} seconds")
 
+    #Functions controlling all activities that should be done before next round
     def roundEnded(winner):
         global finishedPlayers
 
@@ -92,6 +93,8 @@ with daemon.DaemonContext():
                 SRoundEndPacket(scoreboardJsoned, winner, game.word)
             )
             game.round_counter += 1
+            
+            #Resetting variables in game
             game.resetRound()
             for player in game.players:
                 # 0 -> word, 1 -> guessed letters, 2 -> wrong guesses counter, 3 -> good guess
@@ -156,11 +159,19 @@ with daemon.DaemonContext():
                     if player.username == guessing_username:
                         player_address = player.address
                 game.attempts[guessing_username][1] += guessing_letter
+
+                #Wrong guess
                 if guessing_letter not in game.word:
                     game.attempts[guessing_username][2] += 1
+                #Correct guess
                 else:
-                    correctLetters = len([i for i, x in enumerate(game.word) if x == guessing_letter])
-                    game.attempts[guessing_username][3] += correctLetters
+                    #New letter
+                    if guessing_letter not in game.attempts[guessing_username][1]:
+                        correctLetters = len([i for i, x in enumerate(game.word) if x == guessing_letter])
+                        game.attempts[guessing_username][3] += correctLetters
+                    #Letter used before
+                    else:
+                        print("You fool! You have used that letter before. Great waste of round.")
                 new_censored_word = game.updateWordForUser(guessing_username)
                 if game.attempts[guessing_username][3] == game.correctLetters:
                     finishedPlayers += 1
@@ -180,12 +191,14 @@ with daemon.DaemonContext():
         server.select(onPacketRecv, 2)
         round_age = int(time.time()) - round_starting_timestamp
 
+        #Controlling round time
         if round_age >= ROUND_TIME:
             roundEnded(chosenPlayer)
             for scoreboard in game.scoreboard:
                 if scoreboard[0] == chosenPlayer:
                     scoreboard[1] += 1
         
+        #Controlling rounds count
         if game.round_counter == MAX_ROUNDS + 1:
             sorted_scoreboard = sorted(game.scoreboard, key=lambda x: x[1], reverse=True)
             log(f"Sorted scoreboard: {sorted_scoreboard}")
