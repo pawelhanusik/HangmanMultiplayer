@@ -27,16 +27,21 @@ import json
 from network.Server import Server
 
 def log(*args, sep=' '):
-        s = ''
-        first = True
-        for a in args:
-            if first:
-                first = False
-            else:
-                s += str(sep)
-            s += str(a)
-        syslog.syslog(syslog.LOG_DEBUG, s)
+    """
+    Log into syslog. Call this function as you would call print()
+    """
 
+    s = ''
+    first = True
+    for a in args:
+        if first:
+            first = False
+        else:
+            s += str(sep)
+        s += str(a)
+    syslog.syslog(syslog.LOG_DEBUG, s)
+
+# Run server as Daemon
 with daemon.DaemonContext():
     syslog.openlog(sys.argv[0])
 
