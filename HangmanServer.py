@@ -102,6 +102,7 @@ with daemon.DaemonContext():
                 # 0 -> word, 1 -> guessed letters, 2 -> wrong guesses counter, 3 -> good guess
                 game.attempts[player.username] = ["", " ", 0, 0]
             round_starting_timestamp = int(time.time())
+            finishedPlayers = 0
 
     while True:
         server.sendPacket(SServerInfoPacket(serverName))
